@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Documento - AIB</title>
+<style>
+    @media print {
+        @page { size: A4; margin: 12mm; }
+        body { margin: 0; }
+        button { display: none; }
+        table { max-width: 180mm; margin: auto; }
+    }
+    body { font-family: Arial, sans-serif; margin: 1em; background: #fff; color: #000; }
+    .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .logo { max-width: 120px; }
+    .header-text { text-align: center; font-size: 20px; font-weight: bold; flex-grow: 1; }
+    .recibo-numero { margin-top: 10px; font-size: 22px; font-weight: bold; text-align: center; }
+    .section-info { margin-bottom: 1em; font-size: 16px; }
+    .section-info .field { margin: 5px 0; font-size: 16px; }
+    .label { font-weight: bold; }
+    table { width: 100%; max-width: 180mm; margin: auto; border-collapse: collapse; margin-top: 1em; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 6px; }
+    th, td { padding: 6px; border: 1px solid #000; text-align: center; }
+    th { background: #0056b3; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .totales { font-size: 16px; font-weight: bold; text-align: right; margin-top: 1em; max-width: 180mm; margin-left: auto; margin-right: auto; }
+    button { background-color: #0056b3; color: #fff; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease; }
+    button:hover { background-color: #003366; }
+</style>
+</head>
+<body>
+<div class="header-container">
+<img class="logo" src="https://raw.githubusercontent.com/ISACOSDP/RECIBO_AIB/main/docs/LOGO%20AIB.png" alt="LOGO AIB">
+<div class="header-text">
+    AIB<br>QUITO<br>E4D Y LA COCHA<br>0979225720 / 0979274832
+    <div class="recibo-numero"><span id="tipo_doc_titulo"></span> N°: <span id="factura"></span></div>
+</div>
+</div>
+<div class="section-info">
+    <div class="field"><span class="label">FECHA:</span> <span id="fecha"></span></div>
+    <div class="field"><span class="label">CLIENTE:</span> <span id="cliente"></span></div>
+    <div class="field"><span class="label">RUC / CÉDULA:</span> <span id="ruc"></span></div>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>PRODUCTO</th>
+            <th>PRECIO UNITARIO</th>
+            <th>CANTIDAD</th>
+            <th>TOTAL</th>
+        </tr>
+    </thead>
+    <tbody id="detalle"></tbody>
+</table>
+<div class="totales">
+    <p>SUBTOTAL: $<span id="subtotal"></span></p>
+    <p>IVA (15%): $<span id="iva"></span></p>
+    <p>TOTAL: $<span id="total"></span></p>
+    <p>ABONADO: $<span id="abonado"></span></p>
+    <p>SALDO: $<span id="saldo"></span></p>
+</div>
+<div style="text-align: center; margin-top: 20px;">
+    <button onclick="window.print()">IMPRIMIR</button>
+</div>
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const tipoDoc = (urlParams.get("tipo_doc") || "RECIBO").toUpperCase();
+document.getElementById("tipo_doc_titulo").innerText =
+    (tipoDoc === "FACTURA") ? "RECIBO" :
+    (tipoDoc === "PROFORMA") ? "PROFORMA" :
+    "RECIBO";
+document.getElementById("factura").innerText = urlParams.get("factura") || "N/A";
+document.getElementById("cliente").innerText = urlParams.get("cliente") || "N/A";
+document.getElementById("ruc").innerText = urlParams.get("ruc") || "N/A";
+document.getElementById("fecha").innerText = urlParams.get("fecha") || "N/A";
+document.getElementById("subtotal").innerText = urlParams.get("subtotal") || "0.00";
+document.getElementById("iva").innerText = urlParams.get("iva") || "0.00";
+document.getElementById("total").innerText = urlParams.get("total") || "0.00";
+document.getElementById("abonado").innerText = urlParams.get("abonado") || "0.00";
+document.getElementById("saldo").innerText = urlParams.get("saldo") || "0.00";
+function populateTable(elementId, productos, precios, cantidades, totales) {
+    let tableBody = document.getElementById(elementId);
+    let productosArray = productos ? productos.split(",").map(i => i.trim()) : [];
+    let preciosArray = precios ? precios.split(",").map(i => parseFloat(i.trim()).toFixed(2)) : [];
+    let cantidadesArray = cantidades ? cantidades.split(",").map(i => i.trim()) : [];
+    let totalesArray = totales ? totales.split(",").map(i => parseFloat(i.trim()).toFixed(2)) : [];
+    tableBody.innerHTML = "";
+    for (let i = 0; i < productosArray.length; i++) {
+        let row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${productosArray[i]}</td>
+            <td>$${preciosArray[i]}</td>
+            <td>${cantidadesArray[i]}</td>
+            <td>$${totalesArray[i]}</td>
+        `;
+        tableBody.appendChild(row);
+    }
+}
+populateTable(
+    "detalle",
+    urlParams.get("productos"),
+    urlParams.get("precios"),
+    urlParams.get("cantidades"),
+    urlParams.get("totales")
+);
+</script>
+</body>
+</html>
