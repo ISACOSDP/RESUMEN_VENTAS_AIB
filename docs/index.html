@@ -6,18 +6,23 @@
 <title>Resumen de Ventas</title>
 <style>
 body { font-family: Arial, sans-serif; margin: 20px; background: #fff; }
-.header { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+.header-container { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.logo { width: 100px; margin-right: 15px; }
+.header-text { font-size: 24px; font-weight: bold; text-align: center; }
 .filters { text-align: center; margin-bottom: 20px; font-size: 16px; }
 table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 th, td { border: 1px solid #000; padding: 6px; text-align: center; font-size: 14px; }
 th { background-color: #0056b3; color: white; }
-.totales { font-size: 16px; font-weight: bold; text-align: right; margin-top: 20px; }
+.totales { font-size: 16px; font-weight: bold; text-align: center; margin-top: 20px; }
 button { background-color: #0056b3; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; margin-top: 20px; border-radius: 5px; }
 button:hover { background-color: #003366; }
 </style>
 </head>
 <body>
-<div class="header">RESUMEN DE VENTAS</div>
+<div class="header-container">
+<img class="logo" src="https://raw.githubusercontent.com/ISACOSDP/RECIBO_AIB/main/docs/LOGO%20AIB.png" alt="LOGO AIB">
+<div class="header-text">RESUMEN DE VENTAS</div>
+</div>
 <div class="filters" id="filtros"></div>
 <table>
 <thead>
@@ -43,13 +48,11 @@ button:hover { background-color: #003366; }
 <button onclick="window.print()">IMPRIMIR</button>
 </div>
 <script>
-// Simulación de datos (reemplaza con fetch si deseas luego)
 const ventas = [
   { fecha: "2025-07-01", id_venta: "e981781c", id_cliente: "Medicorp EC CIA Ltda", tipo_doc: "FACT", no_doc: "1001", subtotal: 500, iva: 75, valor_factura: 575, valor_cobrado: 200, valor_pendiente: 375, estado: "PENDIENTE", detalle: "Venta de insumos" },
   { fecha: "2025-07-03", id_venta: "bc957a92", id_cliente: "Medicorp EC CIA Ltda", tipo_doc: "FACT", no_doc: "1002", subtotal: 300, iva: 45, valor_factura: 345, valor_cobrado: 345, valor_pendiente: 0, estado: "PAGADA", detalle: "Servicio técnico" }
 ];
 
-// Recibe filtros por URL
 const urlParams = new URLSearchParams(window.location.search);
 const cliente = urlParams.get("cliente") || "Todos";
 const estado = urlParams.get("estado") || "Todos";
@@ -62,7 +65,6 @@ document.getElementById("filtros").innerHTML = `
 <b>Fecha final:</b> ${fechaFin}
 `;
 
-// Cargar ventas filtradas
 const tbody = document.getElementById("tabla-ventas");
 let subtotalAcum = 0, ivaAcum = 0, valorFacturaAcum = 0, valorCobradoAcum = 0, valorPendienteAcum = 0;
 ventas.forEach(v => {
@@ -71,7 +73,6 @@ ventas.forEach(v => {
     valorFacturaAcum += v.valor_factura;
     valorCobradoAcum += v.valor_cobrado;
     valorPendienteAcum += v.valor_pendiente;
-
     const row = document.createElement("tr");
     row.innerHTML = `
     <td>${v.fecha}</td>
@@ -90,7 +91,6 @@ ventas.forEach(v => {
     tbody.appendChild(row);
 });
 
-// Mostrar totales
 document.getElementById("totales").innerHTML = `
 SUBTOTAL: $${subtotalAcum.toFixed(2)} &nbsp; | &nbsp;
 IVA: $${ivaAcum.toFixed(2)} &nbsp; | &nbsp;
