@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Documento - AIB</title>
+<title>Resumen de Ventas - AIB</title>
 <style>
     @media print {
         @page { size: A4; margin: 12mm; }
@@ -12,96 +12,84 @@
         table { max-width: 180mm; margin: auto; }
     }
     body { font-family: Arial, sans-serif; margin: 1em; background: #fff; color: #000; }
-    .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .logo { max-width: 120px; }
-    .header-text { text-align: center; font-size: 20px; font-weight: bold; flex-grow: 1; }
-    .recibo-numero { margin-top: 10px; font-size: 22px; font-weight: bold; text-align: center; }
-    .section-info { margin-bottom: 1em; font-size: 16px; }
-    .section-info .field { margin: 5px 0; font-size: 16px; }
-    .label { font-weight: bold; }
-    table { width: 100%; max-width: 180mm; margin: auto; border-collapse: collapse; margin-top: 1em; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 6px; }
+    .header-text { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 10px; }
+    .filters { text-align: center; margin-bottom: 10px; font-size: 16px; }
+    table { width: 100%; max-width: 180mm; margin: auto; border-collapse: collapse; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 6px; }
     th, td { padding: 6px; border: 1px solid #000; text-align: center; }
     th { background: #0056b3; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .totales { font-size: 16px; font-weight: bold; text-align: right; margin-top: 1em; max-width: 180mm; margin-left: auto; margin-right: auto; }
-    button { background-color: #0056b3; color: #fff; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease; }
+    button { background-color: #0056b3; color: #fff; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease; margin-top: 15px; }
     button:hover { background-color: #003366; }
 </style>
 </head>
 <body>
-<div class="header-container">
-<img class="logo" src="https://raw.githubusercontent.com/ISACOSDP/RECIBO_AIB/main/docs/LOGO%20AIB.png" alt="LOGO AIB">
-<div class="header-text">
-    AIB<br>QUITO<br>E4D Y LA COCHA<br>0979225720 / 0979274832
-    <div class="recibo-numero"><span id="tipo_doc_titulo"></span> N°: <span id="factura"></span></div>
-</div>
-</div>
-<div class="section-info">
-    <div class="field"><span class="label">FECHA:</span> <span id="fecha"></span></div>
-    <div class="field"><span class="label">CLIENTE:</span> <span id="cliente"></span></div>
-    <div class="field"><span class="label">RUC / CÉDULA:</span> <span id="ruc"></span></div>
+<div class="header-text">RESUMEN DE VENTAS - AIB</div>
+<div class="filters">
+    Cliente: <span id="cliente"></span> | Fecha: <span id="fecha_inicio"></span> a <span id="fecha_fin"></span> | Estado: <span id="estado_venta"></span>
 </div>
 <table>
     <thead>
         <tr>
-            <th>PRODUCTO</th>
-            <th>PRECIO UNITARIO</th>
-            <th>CANTIDAD</th>
+            <th>FECHA</th>
+            <th>CLIENTE</th>
+            <th>SUBTOTAL</th>
+            <th>IVA</th>
             <th>TOTAL</th>
+            <th>ESTADO</th>
+            <th>DETALLE</th>
         </tr>
     </thead>
-    <tbody id="detalle"></tbody>
+    <tbody id="tabla-ventas"></tbody>
 </table>
-<div class="totales">
-    <p>SUBTOTAL: $<span id="subtotal"></span></p>
-    <p>IVA (15%): $<span id="iva"></span></p>
-    <p>TOTAL: $<span id="total"></span></p>
-    <p>ABONADO: $<span id="abonado"></span></p>
-    <p>SALDO: $<span id="saldo"></span></p>
-</div>
-<div style="text-align: center; margin-top: 20px;">
+<div style="text-align: center;">
     <button onclick="window.print()">IMPRIMIR</button>
 </div>
 <script>
 const urlParams = new URLSearchParams(window.location.search);
-const tipoDoc = (urlParams.get("tipo_doc") || "RECIBO").toUpperCase();
-document.getElementById("tipo_doc_titulo").innerText =
-    (tipoDoc === "FACTURA") ? "RECIBO" :
-    (tipoDoc === "PROFORMA") ? "PROFORMA" :
-    "RECIBO";
-document.getElementById("factura").innerText = urlParams.get("factura") || "N/A";
-document.getElementById("cliente").innerText = urlParams.get("cliente") || "N/A";
-document.getElementById("ruc").innerText = urlParams.get("ruc") || "N/A";
-document.getElementById("fecha").innerText = urlParams.get("fecha") || "N/A";
-document.getElementById("subtotal").innerText = urlParams.get("subtotal") || "0.00";
-document.getElementById("iva").innerText = urlParams.get("iva") || "0.00";
-document.getElementById("total").innerText = urlParams.get("total") || "0.00";
-document.getElementById("abonado").innerText = urlParams.get("abonado") || "0.00";
-document.getElementById("saldo").innerText = urlParams.get("saldo") || "0.00";
-function populateTable(elementId, productos, precios, cantidades, totales) {
-    let tableBody = document.getElementById(elementId);
-    let productosArray = productos ? productos.split(",").map(i => i.trim()) : [];
-    let preciosArray = precios ? precios.split(",").map(i => parseFloat(i.trim()).toFixed(2)) : [];
-    let cantidadesArray = cantidades ? cantidades.split(",").map(i => i.trim()) : [];
-    let totalesArray = totales ? totales.split(",").map(i => parseFloat(i.trim()).toFixed(2)) : [];
-    tableBody.innerHTML = "";
-    for (let i = 0; i < productosArray.length; i++) {
-        let row = document.createElement("tr");
+const cliente = urlParams.get("cliente") || "Todos";
+const fecha_inicio = urlParams.get("fecha_inicio") || "-";
+const fecha_fin = urlParams.get("fecha_fin") || "-";
+const estado_venta = urlParams.get("estado_venta") || "Todos";
+
+document.getElementById("cliente").innerText = cliente;
+document.getElementById("fecha_inicio").innerText = fecha_inicio;
+document.getElementById("fecha_fin").innerText = fecha_fin;
+document.getElementById("estado_venta").innerText = estado_venta;
+
+// Simulación de datos de ventas, reemplaza con fetch a JSON si deseas
+const ventas = [
+    { fecha: "03/07/2025", cliente: "ITURRALDE ISAAC", subtotal: 700, iva: 105, total: 805, estado: "PENDIENTE", detalle: "Venta mensual" },
+    { fecha: "04/07/2025", cliente: "ITURRALDE ISAAC", subtotal: 400, iva: 60, total: 460, estado: "PAGADA", detalle: "Equipo de computo" },
+    { fecha: "05/07/2025", cliente: "SMITH ENDOMED", subtotal: 350, iva: 52.5, total: 402.5, estado: "PENDIENTE", detalle: "Servicios" },
+    { fecha: "06/07/2025", cliente: "MEDICORP EC CIA LTDA", subtotal: 500, iva: 75, total: 575, estado: "PAGADA", detalle: "Factura #456" },
+];
+
+function cargarVentasFiltradas() {
+    const tbody = document.getElementById("tabla-ventas");
+    tbody.innerHTML = "";
+
+    const filtradas = ventas.filter(v => {
+        const fechaOk = true; // Puedes agregar filtros de fecha aquí
+        const clienteOk = cliente === "Todos" || v.cliente.toUpperCase().includes(cliente.toUpperCase());
+        const estadoOk = estado_venta === "Todos" || v.estado.toUpperCase() === estado_venta.toUpperCase();
+        return fechaOk && clienteOk && estadoOk;
+    });
+
+    filtradas.forEach(v => {
+        const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${productosArray[i]}</td>
-            <td>$${preciosArray[i]}</td>
-            <td>${cantidadesArray[i]}</td>
-            <td>$${totalesArray[i]}</td>
+            <td>${v.fecha}</td>
+            <td>${v.cliente}</td>
+            <td>$${v.subtotal.toFixed(2)}</td>
+            <td>$${v.iva.toFixed(2)}</td>
+            <td>$${v.total.toFixed(2)}</td>
+            <td>${v.estado}</td>
+            <td>${v.detalle}</td>
         `;
-        tableBody.appendChild(row);
-    }
+        tbody.appendChild(row);
+    });
 }
-populateTable(
-    "detalle",
-    urlParams.get("productos"),
-    urlParams.get("precios"),
-    urlParams.get("cantidades"),
-    urlParams.get("totales")
-);
+
+cargarVentasFiltradas();
 </script>
 </body>
 </html>
