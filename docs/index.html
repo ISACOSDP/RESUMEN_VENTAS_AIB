@@ -34,6 +34,86 @@ button:hover { background-color: #003366; }
     <div><strong>PERIODO:</strong> <span id="periodo">-</span></div>
     <div><strong>ESTADO:</strong> <span id="estado">Todos</span></div>
 </div>
-<!-- Tabla permanece igual -->
+<div class="info-block">
+    <div><strong>CLIENTE:</strong> <span id="cliente">Todos</span></div>
+    <div><strong>PERIODO:</strong> <span id="periodo">-</span></div>
+    <div><strong>ESTADO:</strong> <span id="estado">Todos</span></div>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>FECHA</th>
+            <th>CLIENTE</th>
+            <th>ESTADO</th>
+            <th>DETALLE</th>
+            <th>SUBTOTAL</th>
+            <th>IVA</th>
+            <th>TOTAL</th>
+        </tr>
+    </thead>
+    <tbody id="detalle"></tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4">TOTALES</th>
+            <th id="subtotal_suma">$0.00</th>
+            <th id="iva_suma">$0.00</th>
+            <th id="total_suma">$0.00</th>
+        </tr>
+    </tfoot>
+</table>
+<div style="text-align: center; margin-top: 20px;">
+    <button onclick="window.print()">IMPRIMIR</button>
+</div>
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+document.getElementById("cliente").innerText = urlParams.get("cliente") || "Todos";
+document.getElementById("periodo").innerText = urlParams.get("periodo") || "-";
+document.getElementById("estado").innerText = urlParams.get("estado") || "Todos";
+
+function populateTable(elementId, fechas, clientes, estados, detalles, subtotales, ivas, totales) {
+    let tableBody = document.getElementById(elementId);
+    let fechasArray = fechas ? fechas.split(",").map(i => i.trim()) : [];
+    let clientesArray = clientes ? clientes.split(",").map(i => i.trim()) : [];
+    let estadosArray = estados ? estados.split(",").map(i => i.trim()) : [];
+    let detallesArray = detalles ? detalles.split(",").map(i => i.trim()) : [];
+    let subtotalesArray = subtotales ? subtotales.split(",").map(i => parseFloat(i.trim())) : [];
+    let ivasArray = ivas ? ivas.split(",").map(i => parseFloat(i.trim())) : [];
+    let totalesArray = totales ? totales.split(",").map(i => parseFloat(i.trim())) : [];
+    
+    let subtotalSum = 0, ivaSum = 0, totalSum = 0;
+    tableBody.innerHTML = "";
+    for (let i = 0; i < fechasArray.length; i++) {
+        subtotalSum += subtotalesArray[i] || 0;
+        ivaSum += ivasArray[i] || 0;
+        totalSum += totalesArray[i] || 0;
+        let row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${fechasArray[i]}</td>
+            <td>${clientesArray[i]}</td>
+            <td>${estadosArray[i]}</td>
+            <td>${detallesArray[i]}</td>
+            <td>$${subtotalesArray[i].toFixed(2)}</td>
+            <td>$${ivasArray[i].toFixed(2)}</td>
+            <td>$${totalesArray[i].toFixed(2)}</td>
+        `;
+        tableBody.appendChild(row);
+    }
+    document.getElementById("subtotal_suma").innerText = "$" + subtotalSum.toFixed(2);
+    document.getElementById("iva_suma").innerText = "$" + ivaSum.toFixed(2);
+    document.getElementById("total_suma").innerText = "$" + totalSum.toFixed(2);
+}
+
+populateTable(
+    "detalle",
+    urlParams.get("fechas"),
+    urlParams.get("clientes"),
+    urlParams.get("estados"),
+    urlParams.get("detalles"),
+    urlParams.get("subtotales"),
+    urlParams.get("ivas"),
+    urlParams.get("totales")
+);
+</script>
 </body>
 </html>
+
