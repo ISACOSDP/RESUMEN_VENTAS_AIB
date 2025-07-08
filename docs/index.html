@@ -1,119 +1,103 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resumen de Ventas</title>
 <style>
-body { font-family: Arial, sans-serif; margin: 1em; }
-table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 6px; }
-th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+body { font-family: Arial, sans-serif; margin: 20px; background: #fff; }
+.header { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+.filters { text-align: center; margin-bottom: 20px; font-size: 16px; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+th, td { border: 1px solid #000; padding: 6px; text-align: center; font-size: 14px; }
 th { background-color: #0056b3; color: white; }
-.logo { width: 120px; margin-bottom: 10px; }
-.header-container { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-.header-texts { display: flex; flex-direction: column; justify-content: center; align-items: center; margin-left: 20px; }
-.header-title { font-size: 24px; font-weight: bold; text-align: center; }
-.periodo-text { font-size: 16px; font-weight: bold; text-align: center; margin-top: 5px; }
-.totales { font-size: 18px; font-weight: bold; text-align: right; margin-top: 20px; max-width: 100%; margin-left: auto; margin-right: 0; line-height: 1.6; }
-button { background-color: #0056b3; color: #fff; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease; margin-top: 20px; display: block; margin-left: auto; margin-right: auto; }
+.totales { font-size: 16px; font-weight: bold; text-align: right; margin-top: 20px; }
+button { background-color: #0056b3; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; margin-top: 20px; border-radius: 5px; }
 button:hover { background-color: #003366; }
 </style>
 </head>
 <body>
-<div class="header-container">
-<img class="logo" src="https://raw.githubusercontent.com/ISACOSDP/RECIBO_AIB/main/docs/LOGO%20AIB.png" alt="LOGO AIB">
-<div class="header-texts">
-    <div class="header-title">RESUMEN DE VENTAS</div>
-    <div id="periodo" class="periodo-text"></div>
-</div>
-</div>
+<div class="header">RESUMEN DE VENTAS</div>
+<div class="filters" id="filtros"></div>
 <table>
 <thead>
 <tr>
+<th>FECHA DE FACTURACION</th>
 <th>ID_VENTA</th>
-<th>FECHA</th>
-<th>RUC</th>
-<th>CLIENTE</th>
-<th>ESTADO</th>
-<th>DETALLE</th>
+<th>ID_CLIENTE</th>
+<th>TIPO DOC</th>
+<th>NO_DOC</th>
 <th>SUBTOTAL</th>
 <th>IVA</th>
-<th>TOTAL</th>
-<th>ABONADO</th>
-<th>SALDO</th>
+<th>VALOR DE FACTURA</th>
+<th>VALOR COBRADO</th>
+<th>VALOR PENDIENTE</th>
+<th>ESTADOS DE FACTURAS</th>
+<th>DETALLE_DOC</th>
 </tr>
 </thead>
 <tbody id="tabla-ventas"></tbody>
 </table>
-<div id="totales" class="totales"></div>
+<div class="totales" id="totales"></div>
+<div style="text-align: center;">
 <button onclick="window.print()">IMPRIMIR</button>
+</div>
 <script>
-const urlParams = new URLSearchParams(window.location.search);
-const clienteFiltro = (urlParams.get("cliente") || "").toUpperCase();
-const estadoFiltro = (urlParams.get("estado_venta") || "").toUpperCase();
-const fechaInicioStr = urlParams.get("fecha_inicio_filtro") || "";
-const fechaFinStr = urlParams.get("fecha_fin_filtro") || "";
-const fechaInicio = fechaInicioStr ? new Date(fechaInicioStr) : null;
-const fechaFin = fechaFinStr ? new Date(fechaFinStr) : null;
-
-if (fechaInicioStr && fechaFinStr) {
-    document.getElementById("periodo").innerText = `PERÍODO: ${fechaInicioStr} a ${fechaFinStr}`;
-} else if (fechaInicioStr) {
-    document.getElementById("periodo").innerText = `PERÍODO: Desde ${fechaInicioStr}`;
-} else if (fechaFinStr) {
-    document.getElementById("periodo").innerText = `PERÍODO: Hasta ${fechaFinStr}`;
-} else {
-    document.getElementById("periodo").innerText = "PERÍODO: Sin filtro de fechas";
-}
-
+// Simulación de datos (reemplaza con fetch si deseas luego)
 const ventas = [
-{ id: 1, fecha: "2025-07-03", cliente: "ITURRALDE ISAAC", ruc: "1712345678", estado: "PENDIENTE", detalle: "Venta mensual", subtotal: 700, iva: 105, total: 805, abonado: 400, saldo: 405 },
-{ id: 2, fecha: "2025-07-04", cliente: "ITURRALDE ISAAC", ruc: "1712345678", estado: "PAGADA", detalle: "Equipo de computo", subtotal: 400, iva: 60, total: 460, abonado: 460, saldo: 0 },
-{ id: 3, fecha: "2025-07-05", cliente: "SMITH ENDOMED", ruc: "0998765432", estado: "PENDIENTE", detalle: "Servicios", subtotal: 350, iva: 52.5, total: 402.5, abonado: 200, saldo: 202.5 },
-{ id: 4, fecha: "2025-07-06", cliente: "MEDICORP EC CIA LTDA", ruc: "1799999999", estado: "PAGADA", detalle: "Factura #456", subtotal: 500, iva: 75, total: 575, abonado: 575, saldo: 0 }
+  { fecha: "2025-07-01", id_venta: "e981781c", id_cliente: "Medicorp EC CIA Ltda", tipo_doc: "FACT", no_doc: "1001", subtotal: 500, iva: 75, valor_factura: 575, valor_cobrado: 200, valor_pendiente: 375, estado: "PENDIENTE", detalle: "Venta de insumos" },
+  { fecha: "2025-07-03", id_venta: "bc957a92", id_cliente: "Medicorp EC CIA Ltda", tipo_doc: "FACT", no_doc: "1002", subtotal: 300, iva: 45, valor_factura: 345, valor_cobrado: 345, valor_pendiente: 0, estado: "PAGADA", detalle: "Servicio técnico" }
 ];
 
-function cargarVentas() {
+// Recibe filtros por URL
+const urlParams = new URLSearchParams(window.location.search);
+const cliente = urlParams.get("cliente") || "Todos";
+const estado = urlParams.get("estado") || "Todos";
+const fechaInicio = urlParams.get("fecha_inicio") || "-";
+const fechaFin = urlParams.get("fecha_fin") || "-";
+document.getElementById("filtros").innerHTML = `
+<b>Cliente:</b> ${cliente} &nbsp; | &nbsp;
+<b>Estado:</b> ${estado} &nbsp; | &nbsp;
+<b>Fecha inicial:</b> ${fechaInicio} &nbsp; | &nbsp;
+<b>Fecha final:</b> ${fechaFin}
+`;
+
+// Cargar ventas filtradas
 const tbody = document.getElementById("tabla-ventas");
-tbody.innerHTML = "";
-let subtotalAcum = 0, ivaAcum = 0, totalAcum = 0, abonadoAcum = 0, saldoAcum = 0;
+let subtotalAcum = 0, ivaAcum = 0, valorFacturaAcum = 0, valorCobradoAcum = 0, valorPendienteAcum = 0;
 ventas.forEach(v => {
-const fechaVenta = new Date(v.fecha);
-const clienteOk = clienteFiltro === "" || v.cliente.toUpperCase().includes(clienteFiltro);
-const estadoOk = estadoFiltro === "" || v.estado.toUpperCase() === estadoFiltro;
-const fechaOk = (!fechaInicio || fechaVenta >= fechaInicio) && (!fechaFin || fechaVenta <= fechaFin);
-if (clienteOk && estadoOk && fechaOk) {
-subtotalAcum += v.subtotal;
-ivaAcum += v.iva;
-totalAcum += v.total;
-abonadoAcum += v.abonado;
-saldoAcum += v.saldo;
-const row = document.createElement("tr");
-row.innerHTML = `
-<td>${v.id}</td>
-<td>${v.fecha}</td>
-<td>${v.ruc}</td>
-<td>${v.cliente}</td>
-<td>${v.estado}</td>
-<td>${v.detalle}</td>
-<td>$${v.subtotal.toFixed(2)}</td>
-<td>$${v.iva.toFixed(2)}</td>
-<td>$${v.total.toFixed(2)}</td>
-<td>$${v.abonado.toFixed(2)}</td>
-<td>$${v.saldo.toFixed(2)}</td>
-`;
-tbody.appendChild(row);
-}
+    subtotalAcum += v.subtotal;
+    ivaAcum += v.iva;
+    valorFacturaAcum += v.valor_factura;
+    valorCobradoAcum += v.valor_cobrado;
+    valorPendienteAcum += v.valor_pendiente;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+    <td>${v.fecha}</td>
+    <td>${v.id_venta}</td>
+    <td>${v.id_cliente}</td>
+    <td>${v.tipo_doc}</td>
+    <td>${v.no_doc}</td>
+    <td>$${v.subtotal.toFixed(2)}</td>
+    <td>$${v.iva.toFixed(2)}</td>
+    <td>$${v.valor_factura.toFixed(2)}</td>
+    <td>$${v.valor_cobrado.toFixed(2)}</td>
+    <td>$${v.valor_pendiente.toFixed(2)}</td>
+    <td>${v.estado}</td>
+    <td>${v.detalle}</td>
+    `;
+    tbody.appendChild(row);
 });
+
+// Mostrar totales
 document.getElementById("totales").innerHTML = `
-<p>SUBTOTAL: $${subtotalAcum.toFixed(2)}</p>
-<p>IVA (15%): $${ivaAcum.toFixed(2)}</p>
-<p>TOTAL: $${totalAcum.toFixed(2)}</p>
-<p>ABONADO: $${abonadoAcum.toFixed(2)}</p>
-<p>SALDO: $${saldoAcum.toFixed(2)}</p>
+SUBTOTAL: $${subtotalAcum.toFixed(2)} &nbsp; | &nbsp;
+IVA: $${ivaAcum.toFixed(2)} &nbsp; | &nbsp;
+VALOR FACTURA: $${valorFacturaAcum.toFixed(2)} &nbsp; | &nbsp;
+VALOR COBRADO: $${valorCobradoAcum.toFixed(2)} &nbsp; | &nbsp;
+VALOR PENDIENTE: $${valorPendienteAcum.toFixed(2)}
 `;
-}
-cargarVentas();
 </script>
 </body>
 </html>
