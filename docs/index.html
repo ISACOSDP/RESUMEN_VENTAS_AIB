@@ -1,87 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>RESUMEN DE VENTAS</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #000; padding: 8px; text-align: center; }
-        .header-info { margin-top: 20px; }
-        .header-info div { margin-bottom: 5px; }
-        .logo { width: 120px; float: left; margin-right: 20px; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resumen de Ventas - AIB</title>
+<style>
+    @media print {
+        @page { size: A4; margin: 12mm; }
+        body { margin: 0; }
+        button { display: none; }
+        table { max-width: 180mm; margin: auto; }
+    }
+    body { font-family: Arial, sans-serif; margin: 1em; background: #fff; color: #000; }
+    .header-text { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 10px; }
+    .filters { text-align: center; margin-bottom: 10px; font-size: 16px; }
+    table { width: 100%; max-width: 180mm; margin: auto; border-collapse: collapse; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 6px; }
+    th, td { padding: 6px; border: 1px solid #000; text-align: center; }
+    th { background: #0056b3; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    button { background-color: #0056b3; color: #fff; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease; margin-top: 15px; }
+    button:hover { background-color: #003366; }
+</style>
 </head>
 <body>
-    <img src="URL_DE_TU_LOGO" alt="Logo" class="logo">
-    <h1>RESUMEN DE VENTAS</h1>
-    <div class="header-info">
-        <div><strong>CLIENTE:</strong> <span id="cliente">[Nombre Cliente]</span></div>
-        <div><strong>PERIODO:</strong> <span id="periodo">[01/07/2025 - 07/07/2025]</span></div>
-        <div><strong>ESTADO:</strong> <span id="estado">[Pendiente]</span></div>
-    </div>
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>FECHA</th>
-                <th>DETALLE</th>
-                <th>CANTIDAD</th>
-                <th>PRECIO UNITARIO</th>
-                <th>SUBTOTAL</th>
-                <th>IVA</th>
-                <th>TOTAL</th>
-            </tr>
-        </thead>
-        <tbody id="tablaVentas">
-            <!-- Filas generadas dinámicamente -->
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="5"><strong>Totales</strong></td>
-                <td id="subtotalTotal">0.00</td>
-                <td id="ivaTotal">0.00</td>
-                <td id="totalGeneral">0.00</td>
-            </tr>
-        </tfoot>
-    </table>
+<div class="header-text">RESUMEN DE VENTAS - AIB</div>
+<div class="filters">
+    Cliente: <span id="cliente"></span> | Fecha: <span id="fecha_inicio"></span> a <span id="fecha_fin"></span> | Estado: <span id="estado_venta"></span>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>FECHA</th>
+            <th>CLIENTE</th>
+            <th>SUBTOTAL</th>
+            <th>IVA</th>
+            <th>TOTAL</th>
+            <th>ESTADO</th>
+            <th>DETALLE</th>
+        </tr>
+    </thead>
+    <tbody id="tabla-ventas"></tbody>
+</table>
+<div style="text-align: center;">
+    <button onclick="window.print()">IMPRIMIR</button>
+</div>
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const cliente = urlParams.get("cliente") || "Todos";
+const fecha_inicio = urlParams.get("fecha_inicio") || "-";
+const fecha_fin = urlParams.get("fecha_fin") || "-";
+const estado_venta = urlParams.get("estado_venta") || "Todos";
 
-    <script>
-        // Simulación de datos
-        const ventas = [
-            { fecha: '2025-07-01', detalle: 'Producto A', cantidad: 2, precio: 10, iva: 2.4 },
-            { fecha: '2025-07-02', detalle: 'Producto B', cantidad: 1, precio: 20, iva: 2.4 },
-        ];
+document.getElementById("cliente").innerText = cliente;
+document.getElementById("fecha_inicio").innerText = fecha_inicio;
+document.getElementById("fecha_fin").innerText = fecha_fin;
+document.getElementById("estado_venta").innerText = estado_venta;
 
-        const tabla = document.getElementById('tablaVentas');
-        let subtotalAcum = 0, ivaAcum = 0, totalAcum = 0;
+// Simulación de datos de ventas, reemplaza con fetch a JSON si deseas
+const ventas = [
+    { fecha: "03/07/2025", cliente: "ITURRALDE ISAAC", subtotal: 700, iva: 105, total: 805, estado: "PENDIENTE", detalle: "Venta mensual" },
+    { fecha: "04/07/2025", cliente: "ITURRALDE ISAAC", subtotal: 400, iva: 60, total: 460, estado: "PAGADA", detalle: "Equipo de computo" },
+    { fecha: "05/07/2025", cliente: "SMITH ENDOMED", subtotal: 350, iva: 52.5, total: 402.5, estado: "PENDIENTE", detalle: "Servicios" },
+    { fecha: "06/07/2025", cliente: "MEDICORP EC CIA LTDA", subtotal: 500, iva: 75, total: 575, estado: "PAGADA", detalle: "Factura #456" },
+];
 
-        ventas.forEach((v, i) => {
-            const subtotal = v.cantidad * v.precio;
-            const total = subtotal + v.iva;
-            subtotalAcum += subtotal;
-            ivaAcum += v.iva;
-            totalAcum += total;
+function cargarVentasFiltradas() {
+    const tbody = document.getElementById("tabla-ventas");
+    tbody.innerHTML = "";
 
-            const row = `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${v.fecha}</td>
-                    <td>${v.detalle}</td>
-                    <td>${v.cantidad}</td>
-                    <td>${v.precio.toFixed(2)}</td>
-                    <td>${subtotal.toFixed(2)}</td>
-                    <td>${v.iva.toFixed(2)}</td>
-                    <td>${total.toFixed(2)}</td>
-                </tr>
-            `;
-            tabla.innerHTML += row;
-        });
+    const filtradas = ventas.filter(v => {
+        const fechaOk = true; // Puedes agregar filtros de fecha aquí
+        const clienteOk = cliente === "Todos" || v.cliente.toUpperCase().includes(cliente.toUpperCase());
+        const estadoOk = estado_venta === "Todos" || v.estado.toUpperCase() === estado_venta.toUpperCase();
+        return fechaOk && clienteOk && estadoOk;
+    });
 
-        document.getElementById('subtotalTotal').textContent = subtotalAcum.toFixed(2);
-        document.getElementById('ivaTotal').textContent = ivaAcum.toFixed(2);
-        document.getElementById('totalGeneral').textContent = totalAcum.toFixed(2);
-    </script>
+    filtradas.forEach(v => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${v.fecha}</td>
+            <td>${v.cliente}</td>
+            <td>$${v.subtotal.toFixed(2)}</td>
+            <td>$${v.iva.toFixed(2)}</td>
+            <td>$${v.total.toFixed(2)}</td>
+            <td>${v.estado}</td>
+            <td>${v.detalle}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+cargarVentasFiltradas();
+</script>
 </body>
 </html>
