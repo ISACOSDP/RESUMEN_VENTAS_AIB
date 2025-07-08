@@ -1,119 +1,87 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Resumen de Ventas - AIB</title>
-<style>
-@media print {
-    @page { size: A4; margin: 12mm; }
-    body { margin: 0; }
-    button { display: none; }
-    table { max-width: 180mm; margin: auto; }
-}
-body { font-family: Arial, sans-serif; margin: 1em; background: #fff; color: #000; }
-.header-container { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; position: relative; }
-.logo { max-width: 120px; position: absolute; left: 0; }
-.header-text { text-align: center; font-size: 20px; font-weight: bold; }
-.info-block { font-size: 16px; margin: 10px auto; line-height: 1.6; text-align: center; }
-table { width: 100%; max-width: 180mm; margin: auto; border-collapse: collapse; margin-top: 1em; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 6px; }
-th, td { padding: 6px; border: 1px solid #000; text-align: center; }
-th { background: #0056b3; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-.totales { font-size: 16px; font-weight: bold; text-align: right; margin-top: 1em; max-width: 180mm; margin-left: auto; margin-right: auto; }
-button { background-color: #0056b3; color: #fff; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease; }
-button:hover { background-color: #003366; }
-</style>
+    <meta charset="UTF-8">
+    <title>RESUMEN DE VENTAS</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+        .header-info { margin-top: 20px; }
+        .header-info div { margin-bottom: 5px; }
+        .logo { width: 120px; float: left; margin-right: 20px; }
+    </style>
 </head>
 <body>
-<div class="header-container">
-    <img class="logo" src="https://raw.githubusercontent.com/ISACOSDP/RECIBO_AIB/main/docs/LOGO%20AIB.png" alt="LOGO AIB">
-    <div class="header-text">RESUMEN DE VENTAS - AIB</div>
-</div>
-<div class="info-block">
-    <div><strong>CLIENTE:</strong> <span id="cliente">Todos</span></div>
-    <div><strong>PERIODO:</strong> <span id="periodo">-</span></div>
-    <div><strong>ESTADO:</strong> <span id="estado">Todos</span></div>
-</div>
-<div class="info-block">
-    <div><strong>CLIENTE:</strong> <span id="cliente">Todos</span></div>
-    <div><strong>PERIODO:</strong> <span id="periodo">-</span></div>
-    <div><strong>ESTADO:</strong> <span id="estado">Todos</span></div>
-</div>
-<table>
-    <thead>
-        <tr>
-            <th>FECHA</th>
-            <th>CLIENTE</th>
-            <th>ESTADO</th>
-            <th>DETALLE</th>
-            <th>SUBTOTAL</th>
-            <th>IVA</th>
-            <th>TOTAL</th>
-        </tr>
-    </thead>
-    <tbody id="detalle"></tbody>
-    <tfoot>
-        <tr>
-            <th colspan="4">TOTALES</th>
-            <th id="subtotal_suma">$0.00</th>
-            <th id="iva_suma">$0.00</th>
-            <th id="total_suma">$0.00</th>
-        </tr>
-    </tfoot>
-</table>
-<div style="text-align: center; margin-top: 20px;">
-    <button onclick="window.print()">IMPRIMIR</button>
-</div>
-<script>
-const urlParams = new URLSearchParams(window.location.search);
-document.getElementById("cliente").innerText = urlParams.get("cliente") || "Todos";
-document.getElementById("periodo").innerText = urlParams.get("periodo") || "-";
-document.getElementById("estado").innerText = urlParams.get("estado") || "Todos";
+    <img src="URL_DE_TU_LOGO" alt="Logo" class="logo">
+    <h1>RESUMEN DE VENTAS</h1>
+    <div class="header-info">
+        <div><strong>CLIENTE:</strong> <span id="cliente">[Nombre Cliente]</span></div>
+        <div><strong>PERIODO:</strong> <span id="periodo">[01/07/2025 - 07/07/2025]</span></div>
+        <div><strong>ESTADO:</strong> <span id="estado">[Pendiente]</span></div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>FECHA</th>
+                <th>DETALLE</th>
+                <th>CANTIDAD</th>
+                <th>PRECIO UNITARIO</th>
+                <th>SUBTOTAL</th>
+                <th>IVA</th>
+                <th>TOTAL</th>
+            </tr>
+        </thead>
+        <tbody id="tablaVentas">
+            <!-- Filas generadas dinámicamente -->
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5"><strong>Totales</strong></td>
+                <td id="subtotalTotal">0.00</td>
+                <td id="ivaTotal">0.00</td>
+                <td id="totalGeneral">0.00</td>
+            </tr>
+        </tfoot>
+    </table>
 
-function populateTable(elementId, fechas, clientes, estados, detalles, subtotales, ivas, totales) {
-    let tableBody = document.getElementById(elementId);
-    let fechasArray = fechas ? fechas.split(",").map(i => i.trim()) : [];
-    let clientesArray = clientes ? clientes.split(",").map(i => i.trim()) : [];
-    let estadosArray = estados ? estados.split(",").map(i => i.trim()) : [];
-    let detallesArray = detalles ? detalles.split(",").map(i => i.trim()) : [];
-    let subtotalesArray = subtotales ? subtotales.split(",").map(i => parseFloat(i.trim())) : [];
-    let ivasArray = ivas ? ivas.split(",").map(i => parseFloat(i.trim())) : [];
-    let totalesArray = totales ? totales.split(",").map(i => parseFloat(i.trim())) : [];
-    
-    let subtotalSum = 0, ivaSum = 0, totalSum = 0;
-    tableBody.innerHTML = "";
-    for (let i = 0; i < fechasArray.length; i++) {
-        subtotalSum += subtotalesArray[i] || 0;
-        ivaSum += ivasArray[i] || 0;
-        totalSum += totalesArray[i] || 0;
-        let row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${fechasArray[i]}</td>
-            <td>${clientesArray[i]}</td>
-            <td>${estadosArray[i]}</td>
-            <td>${detallesArray[i]}</td>
-            <td>$${subtotalesArray[i].toFixed(2)}</td>
-            <td>$${ivasArray[i].toFixed(2)}</td>
-            <td>$${totalesArray[i].toFixed(2)}</td>
-        `;
-        tableBody.appendChild(row);
-    }
-    document.getElementById("subtotal_suma").innerText = "$" + subtotalSum.toFixed(2);
-    document.getElementById("iva_suma").innerText = "$" + ivaSum.toFixed(2);
-    document.getElementById("total_suma").innerText = "$" + totalSum.toFixed(2);
-}
+    <script>
+        // Simulación de datos
+        const ventas = [
+            { fecha: '2025-07-01', detalle: 'Producto A', cantidad: 2, precio: 10, iva: 2.4 },
+            { fecha: '2025-07-02', detalle: 'Producto B', cantidad: 1, precio: 20, iva: 2.4 },
+        ];
 
-populateTable(
-    "detalle",
-    urlParams.get("fechas"),
-    urlParams.get("clientes"),
-    urlParams.get("estados"),
-    urlParams.get("detalles"),
-    urlParams.get("subtotales"),
-    urlParams.get("ivas"),
-    urlParams.get("totales")
-);
-</script>
+        const tabla = document.getElementById('tablaVentas');
+        let subtotalAcum = 0, ivaAcum = 0, totalAcum = 0;
+
+        ventas.forEach((v, i) => {
+            const subtotal = v.cantidad * v.precio;
+            const total = subtotal + v.iva;
+            subtotalAcum += subtotal;
+            ivaAcum += v.iva;
+            totalAcum += total;
+
+            const row = `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${v.fecha}</td>
+                    <td>${v.detalle}</td>
+                    <td>${v.cantidad}</td>
+                    <td>${v.precio.toFixed(2)}</td>
+                    <td>${subtotal.toFixed(2)}</td>
+                    <td>${v.iva.toFixed(2)}</td>
+                    <td>${total.toFixed(2)}</td>
+                </tr>
+            `;
+            tabla.innerHTML += row;
+        });
+
+        document.getElementById('subtotalTotal').textContent = subtotalAcum.toFixed(2);
+        document.getElementById('ivaTotal').textContent = ivaAcum.toFixed(2);
+        document.getElementById('totalGeneral').textContent = totalAcum.toFixed(2);
+    </script>
 </body>
 </html>
-
