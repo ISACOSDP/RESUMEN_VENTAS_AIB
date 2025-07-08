@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Resumen de Ventas</title>
 <style>
 body { font-family: Arial, sans-serif; margin: 20px; background: #fff; }
@@ -20,7 +20,7 @@ button:hover { background-color: #003366; }
 </head>
 <body>
 <div class="header-container">
-<img class="logo" src="https://raw.githubusercontent.com/ISACOSDP/RECIBO_AIB/main/docs/LOGO%20AIB.png" alt="LOGO AIB">
+<img class="logo" src="https://raw.githubusercontent.com/ISACOSDP/RECIBO_AIB/main/docs/LOGO%20AIB.png" alt="LOGO AIB" />
 <div class="header-text">RESUMEN DE VENTAS</div>
 </div>
 <div class="filters" id="filtros"></div>
@@ -48,16 +48,12 @@ button:hover { background-color: #003366; }
 <button onclick="window.print()">IMPRIMIR</button>
 </div>
 <script>
-const ventas = [
-  { fecha: "2025-07-01", id_venta: "e981781c", id_cliente: "Medicorp EC CIA Ltda", tipo_doc: "FACT", no_doc: "1001", subtotal: 500, iva: 75, valor_factura: 575, valor_cobrado: 200, valor_pendiente: 375, estado: "PENDIENTE", detalle: "Venta de insumos" },
-  { fecha: "2025-07-03", id_venta: "bc957a92", id_cliente: "Medicorp EC CIA Ltda", tipo_doc: "FACT", no_doc: "1002", subtotal: 300, iva: 45, valor_factura: 345, valor_cobrado: 345, valor_pendiente: 0, estado: "PAGADA", detalle: "Servicio técnico" }
-];
-
+// Recibe filtros por URL
 const urlParams = new URLSearchParams(window.location.search);
 const cliente = urlParams.get("cliente") || "Todos";
-const estado = urlParams.get("estado") || "Todos";
-const fechaInicio = urlParams.get("fecha_inicio") || "-";
-const fechaFin = urlParams.get("fecha_fin") || "-";
+const estado = urlParams.get("estado_venta") || "Todos";
+const fechaInicio = urlParams.get("fecha_inicio_filtro") || "-";
+const fechaFin = urlParams.get("fecha_fin_filtro") || "-";
 document.getElementById("filtros").innerHTML = `
 <b>Cliente:</b> ${cliente} &nbsp; | &nbsp;
 <b>Estado:</b> ${estado} &nbsp; | &nbsp;
@@ -65,14 +61,29 @@ document.getElementById("filtros").innerHTML = `
 <b>Fecha final:</b> ${fechaFin}
 `;
 
+// Recibe JSON codificado en base64 por URL (param json)
+const jsonParam = urlParams.get("json");
+let ventas = [];
+if (jsonParam) {
+    try {
+        const jsonDecoded = decodeURIComponent(escape(window.atob(jsonParam)));
+        ventas = JSON.parse(jsonDecoded);
+    } catch (e) {
+        alert("Error procesando datos: " + e);
+    }
+}
+
+// Construye tabla
 const tbody = document.getElementById("tabla-ventas");
 let subtotalAcum = 0, ivaAcum = 0, valorFacturaAcum = 0, valorCobradoAcum = 0, valorPendienteAcum = 0;
+
 ventas.forEach(v => {
-    subtotalAcum += v.subtotal;
-    ivaAcum += v.iva;
-    valorFacturaAcum += v.valor_factura;
-    valorCobradoAcum += v.valor_cobrado;
-    valorPendienteAcum += v.valor_pendiente;
+    subtotalAcum += Number(v.subtotal);
+    ivaAcum += Number(v.iva);
+    valorFacturaAcum += Number(v.valor_factura);
+    valorCobradoAcum += Number(v.valor_cobrado);
+    valorPendienteAcum += Number(v.valor_pendiente);
+
     const row = document.createElement("tr");
     row.innerHTML = `
     <td>${v.fecha}</td>
@@ -80,17 +91,18 @@ ventas.forEach(v => {
     <td>${v.id_cliente}</td>
     <td>${v.tipo_doc}</td>
     <td>${v.no_doc}</td>
-    <td>$${v.subtotal.toFixed(2)}</td>
-    <td>$${v.iva.toFixed(2)}</td>
-    <td>$${v.valor_factura.toFixed(2)}</td>
-    <td>$${v.valor_cobrado.toFixed(2)}</td>
-    <td>$${v.valor_pendiente.toFixed(2)}</td>
+    <td>$${Number(v.subtotal).toFixed(2)}</td>
+    <td>$${Number(v.iva).toFixed(2)}</td>
+    <td>$${Number(v.valor_factura).toFixed(2)}</td>
+    <td>$${Number(v.valor_cobrado).toFixed(2)}</td>
+    <td>$${Number(v.valor_pendiente).toFixed(2)}</td>
     <td>${v.estado}</td>
     <td>${v.detalle}</td>
     `;
     tbody.appendChild(row);
 });
 
+// Mostrar totales
 document.getElementById("totales").innerHTML = `
 <p>SUBTOTAL: $${subtotalAcum.toFixed(2)}</p>
 <p>IVA: $${ivaAcum.toFixed(2)}</p>
